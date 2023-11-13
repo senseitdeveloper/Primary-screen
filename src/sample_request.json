@@ -1,0 +1,32 @@
+{
+ "test": {
+      "use_case": "UC2",
+      "test_case": "TC1",
+      "test_case_id": "TC-123"
+    },
+    "data": {
+        "timestamp": "2020-11-10T03:45:37Z",
+        "moids": [
+            {
+                "name": "ip",
+                "value": "10.40.330.23"
+            },
+            {
+                "name": "cell_id",
+                "value": "5631"
+            }
+        ],
+        "kpis": [
+            {
+                "name": "ul_bitrate",
+                "value": "43.89",
+                "unit": "Mbps"
+            },
+            {
+                "name": "dl_bitrate",
+                "value": "32.09",
+                "unit": "Mbps"
+            }
+        ]
+    }
+}

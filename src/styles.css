@@ -1,0 +1,45 @@
+/* body {
+    background-image: url('matrix.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+} */
+#qrcode {
+    display: flex;
+    justify-content: center;
+    padding-top: calc(100vh/6);
+}
+#pin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-direction: column;
+    min-height: 100vh;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+#title {
+    font-family: "Lucida Console";
+    font-size: 4vw;
+}
+#code {
+    font-family: "Lucida Console";
+    font-size: 8vw;
+}
+#video {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+#videoAlternativeEnding {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
