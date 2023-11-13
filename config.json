@@ -1,0 +1,10 @@
+{
+  "auth-server-url": "https://iambackend.netapps-5gmediahub.eu/realms/5GMediaHUB",
+  "credentials": {
+    "client-id": "my-cosmic-application",
+    "secret": "sOumyjC8mdu63z09QfhlqkHmgx6m2K7r",
+    "x-client": "bXktY29zbWljLWFwcGxpY2F0aW9uOnNPdW15akM4bWR1NjN6MDlRZmhscWtIbWd4Nm0ySzdy"
+  },
+  "realm": "5GMediaHUB",
+  "resource-management-api": "https://ummbackend.netapps-5gmediahub.eu/api"
+}
