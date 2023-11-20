@@ -18,7 +18,7 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    fullscreen: true,
+    // fullscreen: true,
     webPreferences: {
       // preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -32,7 +32,7 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   // playVideoAndListenToTimeUpdate();
 };
@@ -58,43 +58,3 @@ app.on('activate', () => {
     createWindow();
   }
 });
-
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
-
-// Function to play video and listen for time update
-// function playVideoAndListenToTimeUpdate() {
-//   // Set the video source
-//   const videoPath = 'https://5g-test-relay.noriginmedia.com/dash/out.mpd'; // Replace with the actual path of your video file
-
-//   // Spawn a new VLC process with the remote control interface enabled
-//   const vlcProcess = spawn('vlc', [videoPath, '--extraintf', 'rc']);
-
-//   // Connect to the VLC remote control interface on localhost port 9595
-//   const vlcRemoteControl = net.createConnection({ port: 9595 }, () => {
-//     console.log('Connected to VLC remote control interface');
-
-//     // Send 'status' command to get time update information
-//     vlcRemoteControl.write('status\n');
-//   });
-
-//   // Listen for data event to capture time update information
-//   vlcRemoteControl.on('data', (data) => {
-//     // Convert the data to string and extract the time update information
-//     const output = data.toString();
-//     const lines = output.split('\n');
-//     const timeLine = lines.find(line => line.startsWith('time='));
-//     if (timeLine) {
-//       const currentTime = timeLine.split('=')[1];
-//       // Process the current time as needed (e.g., update UI, perform actions, etc.)
-//       console.log('Current Time:', currentTime);
-//     }
-//   });
-
-//   // Listen for close event to clean up resources
-//   vlcRemoteControl.on('close', () => {
-//     // Perform cleanup as needed
-//     console.log('VLC remote control interface closed');
-//   });
-// }

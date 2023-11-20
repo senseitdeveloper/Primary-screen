@@ -1,3 +1,5 @@
+const os = require('os-utils');
+const os2 = require('os');
 // Websocket
 
 let socket=null
@@ -37,6 +39,9 @@ let appLatency = {
     dt: -1,
   },
 };
+
+//video bitrate
+let videoBitrate;
 
 function socketHandler(data){
     socket=new WebSocket(data.url)
@@ -166,15 +171,15 @@ socketHandler(connectData);
 const manifestUri =
     'https://folk.ntnu.no/davidju/dash/out.mpd';
 // const manifestUri = 'https://5g-test-relay.noriginmedia.com/dash/out.mpd';
-// const videoUri = 'https://folk.ntnu.no/davidju/nova_8K.mp4';
-const videoUri = 'https://folk.ntnu.no/davidju/nova_4K.mp4';
+const videoUri = 'https://folk.ntnu.no/davidju/nova_8K.mp4';
+// const videoUri = 'https://folk.ntnu.no/davidju/nova_4K.mp4';
 // const videoUri = 'https://5g-test-relay.noriginmedia.com/nova_8K.mp4';
 // const videoUri = 'http://10.5.1.4:31100/nova_8K.mp4';
 // const videoUri = 'https://5g-test-relay.noriginmedia.com/nova_4K.mp4';
 // const videoUri = 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
 // const videoAlternativeEndingUri = 'https://folk.ntnu.no/davidju/sorry_youre_Out_4K.mp4';
 // const videoAlternativeEndingUri = 'https://5g-test-relay.noriginmedia.com/end_4K.mp4';
-const videoAlternativeEndingUri = 'https://folk.ntnu.no/davidju/end_4K.mp4';
+const videoAlternativeEndingUri = 'https://folk.ntnu.no/davidju/end_8K.mp4';
 // const videoAlternativeEndingUri = 'https://5g-test-relay.noriginmedia.com/end_8K.mp4';
 // const videoAlternativeEndingUri = 'http://10.5.1.4:31100/end_8K.mp4';
 
@@ -219,7 +224,26 @@ window.addEventListener("load", () => {
   // })
 });
 
+function calculateStandardDeviation(values) {
+  var sum = values.reduce(function(sum, value) {
+    return sum + value;
+  }, 0);
 
+  var mean = sum / values.length;
+
+  var squaredDifferences = values.map(function(value) {
+    var difference = value - mean;
+    return difference * difference;
+  });
+
+  var sumSquaredDiff = squaredDifferences.reduce(function(sum, value) {
+    return sum + value;
+  }, 0);
+
+  var variance = sumSquaredDiff / values.length;
+
+  return Math.sqrt(variance);
+}
 
 // shaka player
 function initApp() {
@@ -252,21 +276,38 @@ async function initPlayer() {
   playerAlternativeEnding.addEventListener('error', onErrorEvent);
 
   // Try to load a manifest.
-  // This is an asynchronous process.
+  // This is an asynchronous process
+  
+  //video bitrate
+  video.addEventListener('loadedmetadata', function() {
+    videoBitrate = estimateVideoBitrate(video);
+  });
+
+  function estimateVideoBitrate(videoElement) {
+    var duration = videoElement.duration;
+    var fileSize = 406171462;
+
+    if (duration > 0 && fileSize > 0) {
+      // Calculate bitrate in kbps
+      var bitrate = (fileSize * 8) / (duration * 1000);
+      return Math.round(bitrate);
+    } else {
+      console.warn('Duration or file size information not available.');
+      return null;
+    }
+  }
+
   try {
     await player.load(videoUri);
     await playerAlternativeEnding.load(videoAlternativeEndingUri);
 
-    // document.getElementById("qrcode").style.display = "none";
-    // // show the video element and play the video
-    // const video = document.getElementById('video');
-    // video.style.display="block";
-    // // shaka.polyfill.Fullscreen();
-    // video.play();
-    // video.muted=true;
-
-    // This runs if the asynchronous load is successful.
-    console.log('The video has now been loaded!');
+    document.getElementById("qrcode").style.display = "none";
+    // show the video element and play the video
+    const video = document.getElementById('video');
+    video.style.display="block";
+    // shaka.polyfill.Fullscreen();
+    video.play();
+    video.muted=true;
   } catch (e) {
     // onError is executed if the asynchronous load fails.
     onError(e);
@@ -315,6 +356,21 @@ async function initPlayer() {
   let frameRate;
   let videoTimePrev=0.0;
   let averageFrameRate, minFrameRate=9999, maxFrameRate=-1, sum=0;
+  //cpu usage
+  let sumCPUusage = 0;
+  let averageCPUusage;
+  let k = 0;
+  //ram usage
+  let sumRAMusage = 0;
+  let averageRAMusage;
+  let m = 0;
+  //stall
+  let numberOfBufferings = 0;
+  //frame error rate
+  let frameErrorRate;
+  //video jitter
+  var lastFrameTime = 0;
+  var frameDeltas = [];
 
   //measuring the latency1
   video.onplaying = function() {
@@ -330,9 +386,45 @@ async function initPlayer() {
     // console.log("latency 6: ", appLatency.latency6);
   };
 
+  video.addEventListener('waiting', function() {
+    console.log("Video is buffering");
+    // Do something when the video is buffering
+    numberOfBufferings++;
+  });
+
+  // video.addEventListener('pause', function() {
+  //   console.log("Video is paused");
+  //   // Do something when the video is paused
+  //   numberOfBufferings++;
+  // });
+
+  // video.addEventListener('error', function() {
+  //   // console.error('Error loading or playing the video frame.');
+  //   numberOfFramesError++;
+  //   // You can update your error metrics here
+  //   frameErrorRate = numberOfFramesError;
+  // });
+
   video.addEventListener('timeupdate', () => {
     // console.log("frames dropped: "+player.getStats().droppedFrames);
-    // console.log("total frames (rendered?): "+video.getVideoPlaybackQuality().totalVideoFrames);
+    // console.log("total frames (rendered?): " + video.getVideoPlaybackQuality().totalVideoFrames);
+    // frameErrorRate = player.getStats().droppedFrames/video.getVideoPlaybackQuality().totalVideoFrames;
+    // console.log('frame error rate: ', frameErrorRate);
+
+    //video jitter
+    // Current time of the video in seconds
+    var currentTime = video.currentTime;
+
+    // Calculate the time difference between the current frame and the last frame
+    var frameDelta = currentTime - lastFrameTime;
+
+    // Store the frame delta in the array
+    frameDeltas.push(frameDelta);
+
+    // Update the last frame time
+    lastFrameTime = currentTime;
+    // console.log(frameDelta);
+
     if(Math.floor(video.currentTime)==count*n){
       // console.log("every 5 seconds "+Math.floor(video.currentTime));
       frameRate = (video.getVideoPlaybackQuality().totalVideoFrames-framesPrev)/(video.currentTime-videoTimePrev);
@@ -342,34 +434,35 @@ async function initPlayer() {
         minFrameRate = frameRate;
       if(frameRate > maxFrameRate)
         maxFrameRate = frameRate;
-      // console.log("framerate: "+frameRate);
-      // console.log("average framerate (frames/sec): ", averageFrameRate);
-      // console.log("min: "+minFrameRate);
-      // console.log("max: "+maxFrameRate);
-      // console.log("--------------------------------------");
-      // add to the json kpis
-      // if(count == 3){
-      //   json.data.kpis.push({
-      //     "name": "framerate",
-      //     "value": averageFrameRate.toString(),
-      //     "unit": "frameps"
-      //   });
-      //   console.log(json);
-      //   fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
-      //     method: 'POST',
-      //     headers: {
-      //         'Authorization': 'application/json',
-      //         'Content-Type': 'application/json'
-      //     },
-      //     body: JSON.stringify(json)
-      //   }).then(response => response.json())
-      //     .then(response => console.log(JSON.stringify(response)))
-      // }
+      
       framesPrev=video.getVideoPlaybackQuality().totalVideoFrames;
       videoTimePrev=video.currentTime;
       count++;
     }
-      // console.log("3 seconds "+Math.floor(video.currentTime*10)/10);
+
+    //cpu usage
+    os.cpuUsage((usage) => {
+      k++
+      sumCPUusage += usage;
+      averageCPUusage = sumCPUusage / k;
+    });
+
+    //ram usage
+    if ('performance' in window && 'memory' in performance) {
+      const memoryInfo = performance.memory;
+      m++;
+      sumRAMusage += memoryInfo.usedJSHeapSize;
+      averageRAMusage = sumRAMusage / m;
+      
+      // console.log('ram-usage: ', averageRAMusage + " MB");
+      // console.log('Total JS Heap Size:', memoryInfo.totalJSHeapSize);
+      // console.log('Used JS Heap Size:', memoryInfo.usedJSHeapSize);
+    } else {
+      console.warn('Performance API or Memory API not supported in this browser.');
+    }
+    // const memoryUsage = process.memoryUsage();
+    // console.log('Memory Usage:', memoryUsage);
+
     for(let i=0; i < nrOfEvents; i++){
       if(Math.floor(video.currentTime*10)/10 < triggerTimes[i]+0.2 && Math.floor(video.currentTime*10)/10 > triggerTimes[i]-0.2){
         // console.log('TIME', video.currentTime);
@@ -394,12 +487,58 @@ async function initPlayer() {
     video.style.display="none";
     document.getElementById("pin").style.display = "block";
     document.getElementById("pin").style.display = "flex";
-    // console.log("average framerate (frames/sec): ", averageFrameRate);
+    
+    averageCPUusage *= 100;
+    averageRAMusage /= (1024 * 1024);
+    
+    //frame error rate
+    frameErrorRate = player.getStats().droppedFrames/video.getVideoPlaybackQuality().totalVideoFrames;
+    // console.log("frames dropped: "+player.getStats().droppedFrames);
+    // console.log("total frames (rendered?): " + video.getVideoPlaybackQuality().totalVideoFrames);
+
+    // Calculate the standard deviation of frame deltas
+    var jitter = calculateStandardDeviation(frameDeltas);
 
     json.data.kpis.push({
       "name": "framerate",
       "value": averageFrameRate.toString(),
       "unit": "frameps"
+    });
+
+    json.data.kpis.push({
+      "name": "cpu-usage",
+      "value": averageCPUusage.toString(),
+      "unit": "percent"
+    });
+
+    json.data.kpis.push({
+      "name": "ram-usage",
+      "value": averageRAMusage.toString(),
+      "unit": "MB"
+    });
+
+    json.data.kpis.push({
+      "name": "video-bitrate",
+      "value": videoBitrate.toString(),
+      "unit": "kbps"
+    });
+
+    json.data.kpis.push({
+      "name": "video-resolution",
+      "value": "8K",
+      "unit": " "
+    });
+
+    json.data.kpis.push({
+      "name": "frame-error-rate",
+      "value": frameErrorRate,
+      "unit": " "
+    });
+
+    json.data.kpis.push({
+      "name": "video-jitter",
+      "value": jitter,
+      "unit": "s"
     });
     
     // if(!failed){
@@ -440,10 +579,18 @@ async function initPlayer() {
         }).then(response => response.json())
           .then(response => console.log(JSON.stringify(response)))
       console.log("average framerate (frames/s): ", averageFrameRate);
+      console.log("average cpu-usage (percent): ", averageCPUusage);
+      console.log('ram-usage (MB): ', averageRAMusage);
+      console.log('Estimated Video Bitrate (kpbs):', videoBitrate);
+      console.log('video resolution: 8K');
+      console.log('frame error rate: ', frameErrorRate);
+      console.log('stall probability: ', numberOfBufferings * 100);
+      console.log('Video Jitter (s): ' + jitter);
       console.log("application latencies (ms): ", appLatencies);
     // }
     closeConnection();
   });
+
   videoAlternativeEnding.addEventListener('ended', function(e) {
     // console.log("average framerate (frames/sec): ", averageFrameRate);
     json.data.kpis.push({
@@ -452,49 +599,92 @@ async function initPlayer() {
       "unit": "frameps"
     });
 
-      let appLatencies = [appLatency.latency1.dt, appLatency.trigger[0].dt, appLatency.trigger[1].dt, appLatency.trigger[2].dt, appLatency.trigger[3].dt, appLatency.latency6.dt];
-      json.data.kpis.push({
-        "name": "application latency 1",
-        "value": appLatencies[0].toString(),
-        "unit": "ms"
-      });
-      json.data.kpis.push({
-        "name": "application latency 2",
-        "value": appLatencies[1].toString(),
-        "unit": "ms"
-      });
-      json.data.kpis.push({
-        "name": "application latency 3",
-        "value": appLatencies[2].toString(),
-        "unit": "ms"
-      });
-      json.data.kpis.push({
-        "name": "application latency 4",
-        "value": appLatencies[3].toString(),
-        "unit": "ms"
-      });
-      json.data.kpis.push({
-        "name": "application latency 5",
-        "value": appLatencies[4].toString(),
-        "unit": "ms"
-      });
-      json.data.kpis.push({
-        "name": "application latency 6",
-        "value": appLatencies[5].toString(),
-        "unit": "ms"
-      });
-      console.log(json);
-      fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
-          method: 'POST',
-          headers: {
-              'Authorization': 'application/json',
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(json)
-        }).then(response => response.json())
-          .then(response => console.log(JSON.stringify(response)))
-      console.log("average framerate (frames/s): ", averageFrameRate);
-      console.log("application latencies (ms): ", appLatencies);
+    json.data.kpis.push({
+      "name": "cpu-usage",
+      "value": averageCPUusage.toString(),
+      "unit": "percent"
+    });
+
+    json.data.kpis.push({
+      "name": "ram-usage",
+      "value": averageRAMusage.toString(),
+      "unit": "MB"
+    });
+
+    json.data.kpis.push({
+      "name": "video-bitrate",
+      "value": videoBitrate.toString(),
+      "unit": "kbps"
+    });
+
+    json.data.kpis.push({
+      "name": "video-resolution",
+      "value": "8K",
+      "unit": " "
+    });
+
+    json.data.kpis.push({
+      "name": "frame-error-rate",
+      "value": frameErrorRate,
+      "unit": " "
+    });
+
+    json.data.kpis.push({
+      "name": "video-jitter",
+      "value": jitter,
+      "unit": "s"
+    });
+
+    let appLatencies = [appLatency.latency1.dt, appLatency.trigger[0].dt, appLatency.trigger[1].dt, appLatency.trigger[2].dt, appLatency.trigger[3].dt, appLatency.latency6.dt];
+    json.data.kpis.push({
+      "name": "application latency 1",
+      "value": appLatencies[0].toString(),
+      "unit": "ms"
+    });
+    json.data.kpis.push({
+      "name": "application latency 2",
+      "value": appLatencies[1].toString(),
+      "unit": "ms"
+    });
+    json.data.kpis.push({
+      "name": "application latency 3",
+      "value": appLatencies[2].toString(),
+      "unit": "ms"
+    });
+    json.data.kpis.push({
+      "name": "application latency 4",
+      "value": appLatencies[3].toString(),
+      "unit": "ms"
+    });
+    json.data.kpis.push({
+      "name": "application latency 5",
+      "value": appLatencies[4].toString(),
+      "unit": "ms"
+    });
+    json.data.kpis.push({
+      "name": "application latency 6",
+      "value": appLatencies[5].toString(),
+      "unit": "ms"
+    });
+    console.log(json);
+    fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(json)
+      }).then(response => response.json())
+        .then(response => console.log(JSON.stringify(response)))
+    console.log("average framerate (frames/s): ", averageFrameRate);
+    console.log("average cpu-usage (percent): ", averageCPUusage);
+    console.log('ram-usage (MB): ', averageRAMusage);
+    console.log('Estimated Video Bitrate (kpbs):', videoBitrate);
+    console.log('video resolution: 8K');
+    console.log('frame error rate: ', frameErrorRate);
+    console.log('stall probability: ', numberOfBufferings * 100);
+    console.log('Video Jitter (s): ' + jitter);
+    console.log("application latencies (ms): ", appLatencies);
     closeConnection();
   });
 }
