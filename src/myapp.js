@@ -364,6 +364,7 @@ async function initPlayer() {
   let sumRAMusage = 0;
   let averageRAMusage;
   let m = 0;
+  const totalMemory = os2.totalmem();
   //stall
   let numberOfBufferings = 0;
   //frame error rate
@@ -442,7 +443,7 @@ async function initPlayer() {
 
     //cpu usage
     os.cpuUsage((usage) => {
-      k++
+      k++;
       sumCPUusage += usage;
       averageCPUusage = sumCPUusage / k;
     });
@@ -454,7 +455,7 @@ async function initPlayer() {
       sumRAMusage += memoryInfo.usedJSHeapSize;
       averageRAMusage = sumRAMusage / m;
       
-      // console.log('ram-usage: ', averageRAMusage + " MB");
+      // console.log('ram-usage: ', averageRAMusage/totalMemory * 100 + " %");
       // console.log('Total JS Heap Size:', memoryInfo.totalJSHeapSize);
       // console.log('Used JS Heap Size:', memoryInfo.usedJSHeapSize);
     } else {
@@ -489,7 +490,8 @@ async function initPlayer() {
     document.getElementById("pin").style.display = "flex";
     
     averageCPUusage *= 100;
-    averageRAMusage /= (1024 * 1024);
+    averageRAMusage /= totalMemory;
+    averageRAMusage *= 100;
     
     //frame error rate
     frameErrorRate = player.getStats().droppedFrames/video.getVideoPlaybackQuality().totalVideoFrames;
@@ -514,7 +516,7 @@ async function initPlayer() {
     json.data.kpis.push({
       "name": "ram-usage",
       "value": averageRAMusage.toString(),
-      "unit": "MB"
+      "unit": "percent"
     });
 
     json.data.kpis.push({
@@ -580,7 +582,7 @@ async function initPlayer() {
           .then(response => console.log(JSON.stringify(response)))
       console.log("average framerate (frames/s): ", averageFrameRate);
       console.log("average cpu-usage (percent): ", averageCPUusage);
-      console.log('ram-usage (MB): ', averageRAMusage);
+      console.log('ram-usage (percent): ', averageRAMusage);
       console.log('Estimated Video Bitrate (kpbs):', videoBitrate);
       console.log('video resolution: 8K');
       console.log('frame error rate: ', frameErrorRate);
@@ -608,7 +610,7 @@ async function initPlayer() {
     json.data.kpis.push({
       "name": "ram-usage",
       "value": averageRAMusage.toString(),
-      "unit": "MB"
+      "unit": "percent"
     });
 
     json.data.kpis.push({
@@ -678,7 +680,7 @@ async function initPlayer() {
         .then(response => console.log(JSON.stringify(response)))
     console.log("average framerate (frames/s): ", averageFrameRate);
     console.log("average cpu-usage (percent): ", averageCPUusage);
-    console.log('ram-usage (MB): ', averageRAMusage);
+    console.log('ram-usage (percent): ', averageRAMusage);
     console.log('Estimated Video Bitrate (kpbs):', videoBitrate);
     console.log('video resolution: 8K');
     console.log('frame error rate: ', frameErrorRate);
