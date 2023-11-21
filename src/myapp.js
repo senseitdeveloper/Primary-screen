@@ -309,6 +309,22 @@ async function initPlayer() {
     // shaka.polyfill.Fullscreen();
     video.play();
     video.muted=true;
+
+    //retrieve the token
+    fetch('https://iambackend.netapps-5gmediahub.eu/realms/5GMediaHUB/protocol/openid-connect/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: {
+        'grant_type': 'client_credentials',
+        'client_id': 'my-cosmic-application',
+        'client_secret': 'sOumyjC8mdu63z09QfhlqkHmgx6m2K7r'
+      }
+    }).then(response => response.json())
+    .then(response => console.log(JSON.stringify(response)))
+
+
   } catch (e) {
     // onError is executed if the asynchronous load fails.
     onError(e);
