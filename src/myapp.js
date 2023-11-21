@@ -280,17 +280,18 @@ async function initPlayer() {
   
   //video bitrate
   video.addEventListener('loadedmetadata', function() {
-    videoBitrate = estimateVideoBitrate(video);
+    videoBitrate = estimateVideoBitrate(video); //Mbps
   });
 
   function estimateVideoBitrate(videoElement) {
-    var duration = videoElement.duration;
-    var fileSize = 406171462;
+    var duration = videoElement.duration; //second
+    // var fileSize = 406171462 / (1000 * 1000); //MB
+    var fileSize = 387; //MB
 
     if (duration > 0 && fileSize > 0) {
       // Calculate bitrate in kbps
-      var bitrate = (fileSize * 8) / (duration * 1000);
-      return Math.round(bitrate);
+      var bitrate = (fileSize) / (duration);
+      return Math.round(bitrate * 100) / 100;
     } else {
       console.warn('Duration or file size information not available.');
       return null;
@@ -494,12 +495,12 @@ async function initPlayer() {
     averageRAMusage *= 100;
     
     //frame error rate
-    frameErrorRate = player.getStats().droppedFrames/video.getVideoPlaybackQuality().totalVideoFrames;
+    frameErrorRate = player.getStats().droppedFrames/video.getVideoPlaybackQuality().totalVideoFrames * 100;
     // console.log("frames dropped: "+player.getStats().droppedFrames);
     // console.log("total frames (rendered?): " + video.getVideoPlaybackQuality().totalVideoFrames);
 
     // Calculate the standard deviation of frame deltas
-    var jitter = calculateStandardDeviation(frameDeltas);
+    var jitter = calculateStandardDeviation(frameDeltas)/video.duration * 100;
 
     json.data.kpis.push({
       "name": "framerate",
@@ -540,7 +541,7 @@ async function initPlayer() {
     json.data.kpis.push({
       "name": "video-jitter",
       "value": jitter,
-      "unit": "s"
+      "unit": "percent"
     });
     
     // if(!failed){
@@ -581,13 +582,13 @@ async function initPlayer() {
         }).then(response => response.json())
           .then(response => console.log(JSON.stringify(response)))
       console.log("average framerate (frames/s): ", averageFrameRate);
-      console.log("average cpu-usage (percent): ", averageCPUusage);
-      console.log('ram-usage (percent): ', averageRAMusage);
-      console.log('Estimated Video Bitrate (kpbs):', videoBitrate);
+      console.log("average cpu-usage (%): ", averageCPUusage);
+      console.log('ram-usage (%): ', averageRAMusage);
+      console.log('estimated video bitrate (Mbps):', videoBitrate);
       console.log('video resolution: 8K');
-      console.log('frame error rate: ', frameErrorRate);
-      console.log('stall probability: ', numberOfBufferings * 100);
-      console.log('Video Jitter (s): ' + jitter);
+      console.log('frame error rate (%): ', frameErrorRate);
+      console.log('stall probability (%): ', numberOfBufferings * 100);
+      console.log('video jitter (%): ' + jitter);
       console.log("application latencies (ms): ", appLatencies);
     // }
     closeConnection();
@@ -634,7 +635,7 @@ async function initPlayer() {
     json.data.kpis.push({
       "name": "video-jitter",
       "value": jitter,
-      "unit": "s"
+      "unit": "percent"
     });
 
     let appLatencies = [appLatency.latency1.dt, appLatency.trigger[0].dt, appLatency.trigger[1].dt, appLatency.trigger[2].dt, appLatency.trigger[3].dt, appLatency.latency6.dt];
@@ -679,13 +680,13 @@ async function initPlayer() {
       }).then(response => response.json())
         .then(response => console.log(JSON.stringify(response)))
     console.log("average framerate (frames/s): ", averageFrameRate);
-    console.log("average cpu-usage (percent): ", averageCPUusage);
-    console.log('ram-usage (percent): ', averageRAMusage);
-    console.log('Estimated Video Bitrate (kpbs):', videoBitrate);
+    console.log("average cpu-usage (%): ", averageCPUusage);
+    console.log('ram-usage (%): ', averageRAMusage);
+    console.log('estimated video bitrate (Mbps):', videoBitrate);
     console.log('video resolution: 8K');
     console.log('frame error rate: ', frameErrorRate);
-    console.log('stall probability: ', numberOfBufferings * 100);
-    console.log('Video Jitter (s): ' + jitter);
+    console.log('stall probability (%): ', numberOfBufferings * 100);
+    console.log('video jitter (%): ' + jitter);
     console.log("application latencies (ms): ", appLatencies);
     closeConnection();
   });
