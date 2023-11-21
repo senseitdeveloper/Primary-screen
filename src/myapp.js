@@ -42,6 +42,8 @@ let appLatency = {
 
 //video bitrate
 let videoBitrate;
+//token
+let token;
 
 function socketHandler(data){
     socket=new WebSocket(data.url)
@@ -311,19 +313,23 @@ async function initPlayer() {
     video.muted=true;
 
     //retrieve the token
-    fetch('https://iambackend.netapps-5gmediahub.eu/realms/5GMediaHUB/protocol/openid-connect/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: {
-        'grant_type': 'client_credentials',
-        'client_id': 'my-cosmic-application',
-        'client_secret': 'sOumyjC8mdu63z09QfhlqkHmgx6m2K7r'
-      }
-    }).then(response => response.json())
-    .then(response => console.log(JSON.stringify(response)))
+    try{
+      await  fetch('https://iambackend.netapps-5gmediahub.eu/realms/5GMediaHUB/protocol/openid-connect/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: "&grant_type=client_credentials&client_id=my-cosmic-application&client_secret=sOumyjC8mdu63z09QfhlqkHmgx6m2K7r"
+      }).then(response => response.json())
+      .then(response => {
+        // console.log(response);
+        token = response;
+      })
+    }catch(e){
+      onError(e);
+    }
 
+    // console.log(token.access_token);
 
   } catch (e) {
     // onError is executed if the asynchronous load fails.
@@ -591,7 +597,7 @@ async function initPlayer() {
       fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
           method: 'POST',
           headers: {
-              'Authorization': 'application/json',
+              'Authorization': token.access_token,
               'Content-Type': 'application/json'
           },
           body: JSON.stringify(json)
@@ -611,7 +617,17 @@ async function initPlayer() {
   });
 
   videoAlternativeEnding.addEventListener('ended', function(e) {
-    // console.log("average framerate (frames/sec): ", averageFrameRate);
+    averageCPUusage *= 100;
+    averageRAMusage /= totalMemory;
+    averageRAMusage *= 100;
+    
+    //frame error rate
+    frameErrorRate = player.getStats().droppedFrames/video.getVideoPlaybackQuality().totalVideoFrames * 100;
+    // console.log("frames dropped: "+player.getStats().droppedFrames);
+    // console.log("total frames (rendered?): " + video.getVideoPlaybackQuality().totalVideoFrames);
+
+    // Calculate the standard deviation of frame deltas
+    var jitter = calculateStandardDeviation(frameDeltas)/video.duration * 100;
     json.data.kpis.push({
       "name": "framerate",
       "value": averageFrameRate.toString(),
@@ -689,7 +705,7 @@ async function initPlayer() {
     fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
         method: 'POST',
         headers: {
-            'Authorization': 'application/json',
+            'Authorization': token.access_token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(json)
