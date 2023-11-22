@@ -322,8 +322,8 @@ async function initPlayer() {
         body: "&grant_type=client_credentials&client_id=my-cosmic-application&client_secret=sOumyjC8mdu63z09QfhlqkHmgx6m2K7r"
       }).then(response => response.json())
       .then(response => {
-        // console.log(response);
         token = response;
+        // console.log('Bearer ' + token.access_token);
       })
     }catch(e){
       onError(e);
@@ -597,7 +597,7 @@ async function initPlayer() {
       fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
           method: 'POST',
           headers: {
-              'Authorization': token.access_token,
+              'Authorization': 'Bearer ' + token.access_token,
               'Content-Type': 'application/json'
           },
           body: JSON.stringify(json)
@@ -705,7 +705,7 @@ async function initPlayer() {
     fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
         method: 'POST',
         headers: {
-            'Authorization': token.access_token,
+            'Authorization': 'Bearer ' + token.access_token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(json)
