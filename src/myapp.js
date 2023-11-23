@@ -357,6 +357,8 @@ async function initPlayer() {
 
   let d = new Date();
   let date = d.toISOString();
+  json.test.test_case_id = date + sessionId;
+  // console.log(json.test.test_case_id);
   let seconds = date.split(":")[2];
   seconds = Math.round(seconds.slice(0, -1));
   json.data.timestamp = date.split(":")[0] + ":" + date.split(":")[1] + ":" + seconds + "Z";
