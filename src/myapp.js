@@ -288,7 +288,7 @@ async function initPlayer() {
   function estimateVideoBitrate(videoElement) {
     var duration = videoElement.duration; //second
     // var fileSize = 406171462 / (1000 * 1000); //MB
-    var fileSize = 387; //MB
+    var fileSize = 387 * 8; //Mb
 
     if (duration > 0 && fileSize > 0) {
       // Calculate bitrate in kbps
