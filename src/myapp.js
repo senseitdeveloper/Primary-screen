@@ -44,6 +44,8 @@ let appLatency = {
 let videoBitrate;
 //token
 let token;
+//stall probability
+let stall_probability;
 
 function socketHandler(data){
     socket=new WebSocket(data.url)
@@ -364,16 +366,6 @@ async function initPlayer() {
   json.data.timestamp = date.split(":")[0] + ":" + date.split(":")[1] + ":" + seconds + "Z";
   // console.log(date.split(":")[0] + ":" + date.split(":")[1] + ":" + seconds + "Z");
 
-//   console.log(json);
-//   fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
-//     method: 'POST',
-//     headers: {
-//         'Content-Type': 'application/json'
-//     },
-//     body: JSON.stringify(json)
-// }).then(response => response.json())
-//   .then(response => console.log(JSON.stringify(response)))
-
   //listen to the playing video
   let n=5;
   let count=1;
@@ -526,6 +518,9 @@ async function initPlayer() {
     // Calculate the standard deviation of frame deltas
     var jitter = calculateStandardDeviation(frameDeltas)/video.duration * 100;
 
+    //stall probability
+    stall_probability = numberOfBufferings / video.getVideoPlaybackQuality().totalVideoFrames * 100;
+
     json.data.kpis.push({
       "name": "framerate",
       "value": averageFrameRate.toString(),
@@ -565,6 +560,12 @@ async function initPlayer() {
     json.data.kpis.push({
       "name": "video-jitter",
       "value": jitter,
+      "unit": "percent"
+    });
+
+    json.data.kpis.push({
+      "name": "stall-probability",
+      "value": stall_probability,
       "unit": "percent"
     });
     
@@ -611,7 +612,7 @@ async function initPlayer() {
       console.log('estimated video bitrate (Mbps):', videoBitrate);
       console.log('video resolution: 8K');
       console.log('frame error rate (%): ', frameErrorRate);
-      console.log('stall probability (%): ', numberOfBufferings * 100);
+      console.log('stall probability (%): ', stall_probability);
       console.log('video jitter (%): ' + jitter);
       console.log("application latencies (ms): ", appLatencies);
     // }
@@ -630,6 +631,10 @@ async function initPlayer() {
 
     // Calculate the standard deviation of frame deltas
     var jitter = calculateStandardDeviation(frameDeltas)/video.duration * 100;
+
+    //stall probability
+    stall_probability = numberOfBufferings / video.getVideoPlaybackQuality().totalVideoFrames * 100;
+    
     json.data.kpis.push({
       "name": "framerate",
       "value": averageFrameRate.toString(),
@@ -669,6 +674,12 @@ async function initPlayer() {
     json.data.kpis.push({
       "name": "video-jitter",
       "value": jitter,
+      "unit": "percent"
+    });
+
+    json.data.kpis.push({
+      "name": "stall-probability",
+      "value": stall_probability,
       "unit": "percent"
     });
 
@@ -719,7 +730,7 @@ async function initPlayer() {
     console.log('estimated video bitrate (Mbps):', videoBitrate);
     console.log('video resolution: 8K');
     console.log('frame error rate: ', frameErrorRate);
-    console.log('stall probability (%): ', numberOfBufferings * 100);
+    console.log('stall probability (%): ', stall_probability);
     console.log('video jitter (%): ' + jitter);
     console.log("application latencies (ms): ", appLatencies);
     closeConnection();
