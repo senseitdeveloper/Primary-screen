@@ -331,6 +331,25 @@ async function initPlayer() {
       onError(e);
     }
 
+    //start the experiment on TNOR
+    try{
+      await  fetch('http://10.5.1.4:9055/vi/parameters', {
+        method: 'POST',
+        body: {
+          "action": "start",
+          "use_case": "UC1",
+          "test_case": "TC2",
+          "test_case_id": sessionId
+       }
+      }).then(response => response.json())
+      .then(response => {
+        console.log("ok");
+        console.log(response);
+      })
+    }catch(e){
+      onError(e);
+    }
+
     // console.log(token.access_token);
 
   } catch (e) {
@@ -615,6 +634,20 @@ async function initPlayer() {
       console.log('stall probability (%): ', stall_probability);
       console.log('video jitter (%): ' + jitter);
       console.log("application latencies (ms): ", appLatencies);
+      //stop experiment on TNOR
+      fetch('http://10.5.1.4:9055/vi/parameters', {
+          method: 'POST',
+          body: {
+            "action": "stop",
+            "use_case": "UC1",
+            "test_case": "TC2",
+            "test_case_id": sessionId
+         }
+        }).then(response => response.json())
+        .then(response => {
+          console.log("ok");
+          console.log(response);
+        })
     // }
     closeConnection();
   });
@@ -733,6 +766,21 @@ async function initPlayer() {
     console.log('stall probability (%): ', stall_probability);
     console.log('video jitter (%): ' + jitter);
     console.log("application latencies (ms): ", appLatencies);
+    //stop experiment on TNOR
+    fetch('http://10.5.1.4:9055/vi/parameters', {
+      method: 'POST',
+      body: {
+        "action": "stop",
+        "use_case": "UC1",
+        "test_case": "TC2",
+        "test_case_id": sessionId
+     }
+    }).then(response => response.json())
+    .then(response => {
+      console.log("ok");
+      console.log(response);
+    })
+    
     closeConnection();
   });
 }
