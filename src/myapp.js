@@ -341,11 +341,7 @@ async function initPlayer() {
           "test_case": "TC2",
           "test_case_id": sessionId
        }
-      }).then(response => response.json())
-      .then(response => {
-        console.log("ok");
-        console.log(response);
-      })
+      }).then(response => console.log(response))
     }catch(e){
       onError(e);
     }
