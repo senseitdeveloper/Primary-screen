@@ -1,5 +1,6 @@
 const os = require('os-utils');
 const os2 = require('os');
+const fs = require('fs');
 // Websocket
 
 let socket=null
@@ -159,8 +160,9 @@ function newSessionId() {
   );
 }
 const sessionId = newSessionId();
-// const urlLink = "ws://10.5.1.4:30500";
-const urlLink = "wss://5g-test-relay.noriginmedia.com:9000";
+console.log(sessionId)
+const urlLink = "ws://10.5.1.4:30500";
+// const urlLink = "wss://5g-test-relay.noriginmedia.com:9000";
 
 const connectData={
     url: urlLink,
@@ -172,20 +174,21 @@ socketHandler(connectData);
 
 
 
+
 const manifestUri =
     'https://folk.ntnu.no/davidju/dash/out.mpd';
 // const manifestUri = 'https://5g-test-relay.noriginmedia.com/dash/out.mpd';
-const videoUri = 'https://folk.ntnu.no/davidju/nova_8K.mp4';
+// const videoUri = 'https://folk.ntnu.no/davidju/nova_8K.mp4';
 // const videoUri = 'https://folk.ntnu.no/davidju/nova_4K.mp4';
 // const videoUri = 'https://5g-test-relay.noriginmedia.com/nova_8K.mp4';
-// const videoUri = 'http://10.5.1.4:31100/nova_8K.mp4';
+const videoUri = 'http://10.5.1.4:31100/nova_8K.mp4';
 // const videoUri = 'https://5g-test-relay.noriginmedia.com/nova_4K.mp4';
 // const videoUri = 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
 // const videoAlternativeEndingUri = 'https://folk.ntnu.no/davidju/sorry_youre_Out_4K.mp4';
 // const videoAlternativeEndingUri = 'https://5g-test-relay.noriginmedia.com/end_4K.mp4';
-const videoAlternativeEndingUri = 'https://folk.ntnu.no/davidju/end_8K.mp4';
+// const videoAlternativeEndingUri = 'https://folk.ntnu.no/davidju/end_8K.mp4';
 // const videoAlternativeEndingUri = 'https://5g-test-relay.noriginmedia.com/end_8K.mp4';
-// const videoAlternativeEndingUri = 'http://10.5.1.4:31100/end_8K.mp4';
+const videoAlternativeEndingUri = 'http://10.5.1.4:31100/end_8K.mp4';
 
 let triggerTimes = [];
 let nrOfEvents;
@@ -306,13 +309,13 @@ async function initPlayer() {
     await player.load(videoUri);
     await playerAlternativeEnding.load(videoAlternativeEndingUri);
 
-    document.getElementById("qrcode").style.display = "none";
-    // show the video element and play the video
-    const video = document.getElementById('video');
-    video.style.display="block";
-    // shaka.polyfill.Fullscreen();
-    video.play();
-    video.muted=true;
+    // document.getElementById("qrcode").style.display = "none";
+    // // show the video element and play the video
+    // const video = document.getElementById('video');
+    // video.style.display="block";
+    // // shaka.polyfill.Fullscreen();
+    // video.play();
+    // video.muted=true;
 
     //retrieve the token
     try{
@@ -333,15 +336,18 @@ async function initPlayer() {
 
     //start the experiment on TNOR
     try{
-      await  fetch('http://10.5.1.4:9055/vi/parameters', {
+      await  fetch('http://10.5.1.4:9055/v1/parameters', {
         method: 'POST',
-        body: {
-          "action": "start",
-          "use_case": "UC1",
-          "test_case": "TC2",
-          "test_case_id": sessionId
-       }
-      }).then(response => console.log(response))
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          'action': 'start',
+          'use_case': 'UC1',
+          'test_case': 'TC2',
+          'test_case_id': sessionId
+       })
+      }).then(console.log("start of TNOR kpis"))
     }catch(e){
       onError(e);
     }
@@ -623,27 +629,47 @@ async function initPlayer() {
           .then(response => console.log(JSON.stringify(response)))
       console.log("average framerate (frames/s): ", averageFrameRate);
       console.log("average cpu-usage (%): ", averageCPUusage);
-      console.log('ram-usage (%): ', averageRAMusage);
-      console.log('estimated video bitrate (Mbps):', videoBitrate);
-      console.log('video resolution: 8K');
-      console.log('frame error rate (%): ', frameErrorRate);
-      console.log('stall probability (%): ', stall_probability);
-      console.log('video jitter (%): ' + jitter);
+      console.log("ram-usage (%): ", averageRAMusage);
+      console.log("estimated video bitrate (Mbps):", videoBitrate);
+      console.log("video resolution: 8K");
+      console.log("frame error rate (%): ", frameErrorRate);
+      console.log("stall probability (%): ", stall_probability);
+      console.log("video jitter (%): " + jitter);
       console.log("application latencies (ms): ", appLatencies);
+
+      //write a log file
+      let data = "session id: " + sessionId + "\n";
+      data += "average framerate (frames/s): " + averageFrameRate + "\n";
+      data += "average cpu-usage (%): " + averageCPUusage + "\n";
+      data += "ram-usage (%): " + averageRAMusage + "\n";
+      data += "estimated video bitrate (Mbps):" + videoBitrate + "\n";
+      data += "video resolution: 8K\n";
+      data += "frame error rate (%): " + frameErrorRate + "\n";
+      data += "stall probability (%): " + stall_probability + "\n";
+      data += "video jitter (%): " + jitter + "\n";
+      data += "application latencies (ms): " + appLatencies[0].toString() + ", " + appLatencies[1].toString() + ", " + appLatencies[2].toString() + ", " + appLatencies[3].toString() + ", " + appLatencies[4].toString();
+      let d = new Date();
+      let file_name = './Log/' + d.toISOString().replace(/:/g,"_") + '.txt';
+      fs.writeFile(file_name, data, (err) => {
+      
+          // In case of a error throw err.
+          if (err) throw err;
+      })
+
       //stop experiment on TNOR
-      fetch('http://10.5.1.4:9055/vi/parameters', {
+      fetch('http://10.5.1.4:9055/v1/parameters', {
           method: 'POST',
-          body: {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
             "action": "stop",
             "use_case": "UC1",
             "test_case": "TC2",
             "test_case_id": sessionId
-         }
-        }).then(response => response.json())
-        .then(response => {
-          console.log("ok");
-          console.log(response);
-        })
+         })
+        }).then(console.log("stop of TNOR kpis"))
+
     // }
     closeConnection();
   });
@@ -762,20 +788,39 @@ async function initPlayer() {
     console.log('stall probability (%): ', stall_probability);
     console.log('video jitter (%): ' + jitter);
     console.log("application latencies (ms): ", appLatencies);
+
+    //write a log file
+    let data = "session id: " + sessionId + "\n";
+    data += "average framerate (frames/s): " + averageFrameRate + "\n";
+    data += "average cpu-usage (%): " + averageCPUusage + "\n";
+    data += "ram-usage (%): " + averageRAMusage + "\n";
+    data += "estimated video bitrate (Mbps):" + videoBitrate + "\n";
+    data += "video resolution: 8K\n";
+    data += "frame error rate (%): " + frameErrorRate + "\n";
+    data += "stall probability (%): " + stall_probability + "\n";
+    data += "video jitter (%): " + jitter + "\n";
+    data += "application latencies (ms): " + appLatencies[0].toString() + ", " + appLatencies[1].toString() + ", " + appLatencies[2].toString() + ", " + appLatencies[3].toString() + ", " + appLatencies[4].toString();
+    let d = new Date();
+    let file_name = './Log/' + d.toISOString().replace(/:/g,"_") + '.txt';
+    fs.writeFile(file_name, data, (err) => {
+    
+        // In case of a error throw err.
+        if (err) throw err;
+    })
+
     //stop experiment on TNOR
-    fetch('http://10.5.1.4:9055/vi/parameters', {
+    fetch('http://10.5.1.4:9055/v1/parameters', {
       method: 'POST',
-      body: {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
         "action": "stop",
         "use_case": "UC1",
         "test_case": "TC2",
         "test_case_id": sessionId
-     }
-    }).then(response => response.json())
-    .then(response => {
-      console.log("ok");
-      console.log(response);
-    })
+     })
+    }).then(console.log("stop of TNOR kpis"))
     
     closeConnection();
   });
