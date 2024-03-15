@@ -121,23 +121,23 @@ function socketHandler(data){
           // console.log("latency 5: ", appLatency.trigger[i]);
         }
         // quiz is failed/alternative ending
-        // if(message.kpi == 'failed'){
-        //   failed = true;
-        //   const video = document.getElementById('video');
-        //   const videoAlternativeEnding = document.getElementById('videoAlternativeEnding');
+        if(message.kpi == 'failed'){
+          failed = true;
+          const video = document.getElementById('video');
+          const videoAlternativeEnding = document.getElementById('videoAlternativeEnding');
 
-        //   video.pause();
-        //   video.muted=true;
-        //   document.getElementById("video").style.display = "none";
+          video.pause();
+          video.muted=true;
+          document.getElementById("video").style.display = "none";
 
-        //   videoAlternativeEnding.style.display="block";
-        //   videoAlternativeEnding.play();
-        //   videoAlternativeEnding.muted=false;
+          videoAlternativeEnding.style.display="block";
+          videoAlternativeEnding.play();
+          videoAlternativeEnding.muted=false;
 
-        //   appLatency.latency6.screen2 = message.time;
+          appLatency.latency6.screen2 = message.time;
 
-        //   closeConnection();
-        // }
+          closeConnection();
+        }
       }
 
       // try {
@@ -569,350 +569,6 @@ async function initPlayer() {
     // }
     closeConnection();
   });
-    
-  });
-
-  function estimateVideoBitrate(videoElement) {
-    var duration = videoElement.duration; //second
-    // var fileSize = 406171462 / (1000 * 1000); //MB
-    var fileSize = 387 * 8; //Mb
-
-    if (duration > 0 && fileSize > 0) {
-      // Calculate bitrate in kbps
-      var bitrate = (fileSize) / (duration);
-      return Math.round(bitrate * 100) / 100;
-    } else {
-      console.warn('Duration or file size information not available.');
-      return null;
-    }
-  }
-
-  try {
-    await player.load(videoUri);
-    await playerAlternativeEnding.load(videoAlternativeEndingUri);
-
-    // document.getElementById("qrcode").style.display = "none";
-    // // show the video element and play the video
-    // const video = document.getElementById('video');
-    // video.style.display="block";
-    // // shaka.polyfill.Fullscreen();
-    // video.play();
-    // video.muted=true;
-
-    //retrieve the token
-    try{
-      await  fetch('https://iambackend.netapps-5gmediahub.eu/realms/5GMediaHUB/protocol/openid-connect/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: "&grant_type=client_credentials&client_id=my-cosmic-application&client_secret=sOumyjC8mdu63z09QfhlqkHmgx6m2K7r"
-      }).then(response => response.json())
-      .then(response => {
-        token = response;
-        // console.log('Bearer ' + token.access_token);
-      })
-    }catch(e){
-      onError(e);
-    }
-
-    //start the experiment on TNOR
-    try{
-      await  fetch('http://10.5.1.4:9055/v1/parameters', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          'action': 'start',
-          'use_case': 'UC1',
-          'test_case': 'TC2',
-          'test_case_id': sessionId
-       })
-      }).then(console.log("start of TNOR kpis"))
-    }catch(e){
-      onError(e);
-    }
-
-    // console.log(token.access_token);
-
-  } catch (e) {
-    // onError is executed if the asynchronous load fails.
-    onError(e);
-  }
-
-  
-
-  //measuring the latency1
-  video.onplaying = function() {
-    let date = new Date();
-    appLatency.latency1.screen1 = date.getTime();
-  };
-
-  videoAlternativeEnding.onplaying = function() {
-    let date = new Date();
-    appLatency.latency6.screen1 = date.getTime();
-
-    appLatency.latency6.dt = Math.abs(appLatency.latency6.screen1 - appLatency.latency6.screen2);
-    // console.log("latency 6: ", appLatency.latency6);
-  };
-
-  video.addEventListener('waiting', function() {
-    console.log("Video is buffering");
-    // Do something when the video is buffering
-    numberOfBufferings++;
-  });
-
-  // video.addEventListener('pause', function() {
-  //   console.log("Video is paused");
-  //   // Do something when the video is paused
-  //   numberOfBufferings++;
-  // });
-
-  // video.addEventListener('error', function() {
-  //   // console.error('Error loading or playing the video frame.');
-  //   numberOfFramesError++;
-  //   // You can update your error metrics here
-  //   frameErrorRate = numberOfFramesError;
-  // });
-
-  // video.addEventListener('timeupdate', () => {
-  //   // videoBitrate = estimateVideoBitrate(video); //Mbps
-  //   // console.log("frames dropped: "+player.getStats().droppedFrames);
-  //   // console.log("total frames (rendered?): " + video.getVideoPlaybackQuality().totalVideoFrames);
-  //   // frameErrorRate = player.getStats().droppedFrames/video.getVideoPlaybackQuality().totalVideoFrames;
-  //   // console.log('frame error rate: ', frameErrorRate);
-
-  //   //video jitter
-  //   // Current time of the video in seconds
-  //   // var currentTime;
-    
-
-  //   // Calculate the time difference between the current frame and the last frame
-  //   var frameDelta = currentTime - lastFrameTime;
-
-  //   // Store the frame delta in the array
-  //   frameDeltas.push(frameDelta);
-
-  //   // Update the last frame time
-  //   lastFrameTime = currentTime;
-  //   // console.log(frameDelta);
-
-  //   if(count == 0){
-  //     count = Math.ceil(currentTime / n);
-  //     console.log(count);
-  //     console.log("current time: ", currentTime);
-  //   }
-  //   if(Math.floor(video.currentTime) < count*n + 1 && Math.floor(video.currentTime) > count*n - 1){
-  //     // console.log("every 5 seconds "+Math.floor(video.currentTime));
-  //     frameRate = (video.getVideoPlaybackQuality().totalVideoFrames-framesPrev)/(video.currentTime-videoTimePrev);
-  //     sum += frameRate;
-  //     console.log("framerate: ", frameRate);
-  //     averageFrameRate = sum/count;
-  //     if(frameRate < minFrameRate)
-  //       minFrameRate = frameRate;
-  //     if(frameRate > maxFrameRate)
-  //       maxFrameRate = frameRate;
-      
-  //     framesPrev=video.getVideoPlaybackQuality().totalVideoFrames;
-  //     videoTimePrev=video.currentTime;
-  //     count++;
-  //   }
-
-  //   //cpu usage
-  //   os.cpuUsage((usage) => {
-  //     k++;
-  //     sumCPUusage += usage;
-  //     averageCPUusage = sumCPUusage / k;
-  //   });
-
-  //   //ram usage
-  //   if ('performance' in window && 'memory' in performance) {
-  //     const memoryInfo = performance.memory;
-  //     m++;
-  //     sumRAMusage += memoryInfo.usedJSHeapSize;
-  //     averageRAMusage = sumRAMusage / m;
-      
-  //     // console.log('ram-usage: ', averageRAMusage/totalMemory * 100 + " %");
-  //     // console.log('Total JS Heap Size:', memoryInfo.totalJSHeapSize);
-  //     // console.log('Used JS Heap Size:', memoryInfo.usedJSHeapSize);
-  //   } else {
-  //     console.warn('Performance API or Memory API not supported in this browser.');
-  //   }
-  //   // const memoryUsage = process.memoryUsage();
-  //   // console.log('Memory Usage:', memoryUsage);
-
-  //   for(let i=0; i < nrOfEvents; i++){
-  //     if(Math.floor(video.currentTime*10)/10 < triggerTimes[i]+0.2 && Math.floor(video.currentTime*10)/10 > triggerTimes[i]-0.2){
-  //       // console.log('TIME', video.currentTime);
-  //       socket.send(JSON.stringify(
-  //         {
-  //           event: 'message',
-  //           sessionId: sessionId,
-  //           message: 'trigger'+(i+1).toString()
-  //         }
-  //       ));
-  //       // latencies 2,3,4,5
-  //       let date = new Date();
-  //       appLatency.trigger[i].screen1 = date.getTime();
-
-  //       triggerTimes[i]=-1;
-  //     }
-  //   }
-  // });
-
-  //video has ended
-  video.addEventListener('ended', function(e) {
-    video.style.display="none";
-    document.getElementById("pin").style.display = "block";
-    document.getElementById("pin").style.display = "flex";
-    
-    averageCPUusage *= 100;
-    averageRAMusage /= totalMemory;
-    averageRAMusage *= 100;
-    
-    //frame error rate
-    frameErrorRate = player.getStats().droppedFrames/video.getVideoPlaybackQuality().totalVideoFrames * 100;
-    // console.log("frames dropped: "+player.getStats().droppedFrames);
-    // console.log("total frames (rendered?): " + video.getVideoPlaybackQuality().totalVideoFrames);
-
-    // Calculate the standard deviation of frame deltas
-    var jitter = calculateStandardDeviation(frameDeltas)/video.duration * 100;
-
-    //stall probability
-    stall_probability = numberOfBufferings / video.getVideoPlaybackQuality().totalVideoFrames * 100;
-
-    json.data.kpis.push({
-      "name": "framerate",
-      "value": averageFrameRate.toString(),
-      "unit": "frameps"
-    });
-
-    json.data.kpis.push({
-      "name": "cpu-usage",
-      "value": averageCPUusage.toString(),
-      "unit": "percent"
-    });
-
-    json.data.kpis.push({
-      "name": "ram-usage",
-      "value": averageRAMusage.toString(),
-      "unit": "percent"
-    });
-
-    json.data.kpis.push({
-      "name": "video-bitrate",
-      "value": videoBitrate.toString(),
-      "unit": "kbps"
-    });
-
-    json.data.kpis.push({
-      "name": "video-resolution",
-      "value": "8K",
-      "unit": " "
-    });
-
-    json.data.kpis.push({
-      "name": "frame-error-rate",
-      "value": frameErrorRate,
-      "unit": " "
-    });
-
-    json.data.kpis.push({
-      "name": "video-jitter",
-      "value": jitter,
-      "unit": "percent"
-    });
-
-    json.data.kpis.push({
-      "name": "stall-probability",
-      "value": stall_probability,
-      "unit": "percent"
-    });
-    
-    // if(!failed){
-      let appLatencies = [appLatency.latency1.dt, appLatency.trigger[0].dt, appLatency.trigger[1].dt, appLatency.trigger[2].dt, appLatency.trigger[3].dt];
-      json.data.kpis.push({
-        "name": "application latency 1",
-        "value": appLatencies[0].toString(),
-        "unit": "ms"
-      });
-      json.data.kpis.push({
-        "name": "application latency 2",
-        "value": appLatencies[1].toString(),
-        "unit": "ms"
-      });
-      json.data.kpis.push({
-        "name": "application latency 3",
-        "value": appLatencies[2].toString(),
-        "unit": "ms"
-      });
-      json.data.kpis.push({
-        "name": "application latency 4",
-        "value": appLatencies[3].toString(),
-        "unit": "ms"
-      });
-      json.data.kpis.push({
-        "name": "application latency 5",
-        "value": appLatencies[4].toString(),
-        "unit": "ms"
-      });
-      console.log(json);
-      fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
-          method: 'POST',
-          headers: {
-              'Authorization': 'Bearer ' + token.access_token,
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(json)
-        }).then(response => response.json())
-          .then(response => console.log(JSON.stringify(response)))
-      console.log("average framerate (frames/s): ", averageFrameRate);
-      console.log("average cpu-usage (%): ", averageCPUusage);
-      console.log("ram-usage (%): ", averageRAMusage);
-      console.log("estimated video bitrate (Mbps):", videoBitrate);
-      console.log("video resolution: 8K");
-      console.log("frame error rate (%): ", frameErrorRate);
-      console.log("stall probability (%): ", stall_probability);
-      console.log("video jitter (%): " + jitter);
-      console.log("application latencies (ms): ", appLatencies);
-
-      //write a log file
-      let data = "session id: " + sessionId + "\n";
-      data += "average framerate (frames/s): " + averageFrameRate + "\n";
-      data += "average cpu-usage (%): " + averageCPUusage + "\n";
-      data += "ram-usage (%): " + averageRAMusage + "\n";
-      data += "estimated video bitrate (Mbps):" + videoBitrate + "\n";
-      data += "video resolution: 8K\n";
-      data += "frame error rate (%): " + frameErrorRate + "\n";
-      data += "stall probability (%): " + stall_probability + "\n";
-      data += "video jitter (%): " + jitter + "\n";
-      data += "application latencies (ms): " + appLatencies[0].toString() + ", " + appLatencies[1].toString() + ", " + appLatencies[2].toString() + ", " + appLatencies[3].toString() + ", " + appLatencies[4].toString();
-      let d = new Date();
-      let file_name = './Log/' + d.toISOString().replace(/:/g,"_") + '.txt';
-      fs.writeFile(file_name, data, (err) => {
-      
-          // In case of a error throw err.
-          if (err) throw err;
-      })
-
-      //stop experiment on TNOR
-      fetch('http://10.5.1.4:9055/v1/parameters', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            "action": "stop",
-            "use_case": "UC1",
-            "test_case": "TC2",
-            "test_case_id": sessionId
-         })
-        }).then(console.log("stop of TNOR kpis"))
-
-    // }
-    closeConnection();
-  });
 
   videoAlternativeEnding.addEventListener('ended', function(e) {
     averageCPUusage *= 100;
@@ -1064,6 +720,264 @@ async function initPlayer() {
     
     closeConnection();
   });
+    
+  });
+
+  function estimateVideoBitrate(videoElement) {
+    var duration = videoElement.duration; //second
+    // var fileSize = 406171462 / (1000 * 1000); //MB
+    var fileSize = 387 * 8; //Mb
+
+    if (duration > 0 && fileSize > 0) {
+      // Calculate bitrate in kbps
+      var bitrate = (fileSize) / (duration);
+      return Math.round(bitrate * 100) / 100;
+    } else {
+      console.warn('Duration or file size information not available.');
+      return null;
+    }
+  }
+
+  try {
+    await player.load(videoUri);
+    await playerAlternativeEnding.load(videoAlternativeEndingUri);
+
+    // document.getElementById("qrcode").style.display = "none";
+    // // show the video element and play the video
+    // const video = document.getElementById('video');
+    // video.style.display="block";
+    // // shaka.polyfill.Fullscreen();
+    // video.play();
+    // video.muted=true;
+
+    //retrieve the token
+    try{
+      await  fetch('https://iambackend.netapps-5gmediahub.eu/realms/5GMediaHUB/protocol/openid-connect/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: "&grant_type=client_credentials&client_id=my-cosmic-application&client_secret=sOumyjC8mdu63z09QfhlqkHmgx6m2K7r"
+      }).then(response => response.json())
+      .then(response => {
+        token = response;
+        // console.log('Bearer ' + token.access_token);
+      })
+    }catch(e){
+      onError(e);
+    }
+
+    //start the experiment on TNOR
+    try{
+      await  fetch('http://10.5.1.4:9055/v1/parameters', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          'action': 'start',
+          'use_case': 'UC1',
+          'test_case': 'TC2',
+          'test_case_id': sessionId
+       })
+      }).then(console.log("start of TNOR kpis"))
+    }catch(e){
+      onError(e);
+    }
+
+    // console.log(token.access_token);
+
+  } catch (e) {
+    // onError is executed if the asynchronous load fails.
+    onError(e);
+  }
+
+  
+
+  //measuring the latency1
+  video.onplaying = function() {
+    let date = new Date();
+    appLatency.latency1.screen1 = date.getTime();
+  };
+
+  videoAlternativeEnding.onplaying = function() {
+    let date = new Date();
+    appLatency.latency6.screen1 = date.getTime();
+
+    appLatency.latency6.dt = Math.abs(appLatency.latency6.screen1 - appLatency.latency6.screen2);
+    // console.log("latency 6: ", appLatency.latency6);
+  };
+
+  video.addEventListener('waiting', function() {
+    console.log("Video is buffering");
+    // Do something when the video is buffering
+    numberOfBufferings++;
+  });
+
+  // video.addEventListener('pause', function() {
+  //   console.log("Video is paused");
+  //   // Do something when the video is paused
+  //   numberOfBufferings++;
+  // });
+
+  // video.addEventListener('error', function() {
+  //   // console.error('Error loading or playing the video frame.');
+  //   numberOfFramesError++;
+  //   // You can update your error metrics here
+  //   frameErrorRate = numberOfFramesError;
+  // });
+
+
+  // videoAlternativeEnding.addEventListener('ended', function(e) {
+  //   averageCPUusage *= 100;
+  //   averageRAMusage /= totalMemory;
+  //   averageRAMusage *= 100;
+    
+  //   //frame error rate
+  //   frameErrorRate = player.getStats().droppedFrames/video.getVideoPlaybackQuality().totalVideoFrames * 100;
+  //   // console.log("frames dropped: "+player.getStats().droppedFrames);
+  //   // console.log("total frames (rendered?): " + video.getVideoPlaybackQuality().totalVideoFrames);
+
+  //   // Calculate the standard deviation of frame deltas
+  //   var jitter = calculateStandardDeviation(frameDeltas)/video.duration * 100;
+
+  //   //stall probability
+  //   stall_probability = numberOfBufferings / video.getVideoPlaybackQuality().totalVideoFrames * 100;
+    
+  //   json.data.kpis.push({
+  //     "name": "framerate",
+  //     "value": averageFrameRate.toString(),
+  //     "unit": "frameps"
+  //   });
+
+  //   json.data.kpis.push({
+  //     "name": "cpu-usage",
+  //     "value": averageCPUusage.toString(),
+  //     "unit": "percent"
+  //   });
+
+  //   json.data.kpis.push({
+  //     "name": "ram-usage",
+  //     "value": averageRAMusage.toString(),
+  //     "unit": "percent"
+  //   });
+
+  //   json.data.kpis.push({
+  //     "name": "video-bitrate",
+  //     "value": videoBitrate.toString(),
+  //     "unit": "kbps"
+  //   });
+
+  //   json.data.kpis.push({
+  //     "name": "video-resolution",
+  //     "value": "8K",
+  //     "unit": " "
+  //   });
+
+  //   json.data.kpis.push({
+  //     "name": "frame-error-rate",
+  //     "value": frameErrorRate,
+  //     "unit": " "
+  //   });
+
+  //   json.data.kpis.push({
+  //     "name": "video-jitter",
+  //     "value": jitter,
+  //     "unit": "percent"
+  //   });
+
+  //   json.data.kpis.push({
+  //     "name": "stall-probability",
+  //     "value": stall_probability,
+  //     "unit": "percent"
+  //   });
+
+  //   let appLatencies = [appLatency.latency1.dt, appLatency.trigger[0].dt, appLatency.trigger[1].dt, appLatency.trigger[2].dt, appLatency.trigger[3].dt, appLatency.latency6.dt];
+  //   json.data.kpis.push({
+  //     "name": "application latency 1",
+  //     "value": appLatencies[0].toString(),
+  //     "unit": "ms"
+  //   });
+  //   json.data.kpis.push({
+  //     "name": "application latency 2",
+  //     "value": appLatencies[1].toString(),
+  //     "unit": "ms"
+  //   });
+  //   json.data.kpis.push({
+  //     "name": "application latency 3",
+  //     "value": appLatencies[2].toString(),
+  //     "unit": "ms"
+  //   });
+  //   json.data.kpis.push({
+  //     "name": "application latency 4",
+  //     "value": appLatencies[3].toString(),
+  //     "unit": "ms"
+  //   });
+  //   json.data.kpis.push({
+  //     "name": "application latency 5",
+  //     "value": appLatencies[4].toString(),
+  //     "unit": "ms"
+  //   });
+  //   json.data.kpis.push({
+  //     "name": "application latency 6",
+  //     "value": appLatencies[5].toString(),
+  //     "unit": "ms"
+  //   });
+  //   console.log(json);
+  //   fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
+  //       method: 'POST',
+  //       headers: {
+  //           'Authorization': 'Bearer ' + token.access_token,
+  //           'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify(json)
+  //     }).then(response => response.json())
+  //       .then(response => console.log(JSON.stringify(response)))
+  //   console.log("average framerate (frames/s): ", averageFrameRate);
+  //   console.log("average cpu-usage (%): ", averageCPUusage);
+  //   console.log('ram-usage (%): ', averageRAMusage);
+  //   console.log('estimated video bitrate (Mbps):', videoBitrate);
+  //   console.log('video resolution: 8K');
+  //   console.log('frame error rate: ', frameErrorRate);
+  //   console.log('stall probability (%): ', stall_probability);
+  //   console.log('video jitter (%): ' + jitter);
+  //   console.log("application latencies (ms): ", appLatencies);
+
+  //   //write a log file
+  //   let data = "session id: " + sessionId + "\n";
+  //   data += "average framerate (frames/s): " + averageFrameRate + "\n";
+  //   data += "average cpu-usage (%): " + averageCPUusage + "\n";
+  //   data += "ram-usage (%): " + averageRAMusage + "\n";
+  //   data += "estimated video bitrate (Mbps):" + videoBitrate + "\n";
+  //   data += "video resolution: 8K\n";
+  //   data += "frame error rate (%): " + frameErrorRate + "\n";
+  //   data += "stall probability (%): " + stall_probability + "\n";
+  //   data += "video jitter (%): " + jitter + "\n";
+  //   data += "application latencies (ms): " + appLatencies[0].toString() + ", " + appLatencies[1].toString() + ", " + appLatencies[2].toString() + ", " + appLatencies[3].toString() + ", " + appLatencies[4].toString();
+  //   let d = new Date();
+  //   let file_name = './Log/' + d.toISOString().replace(/:/g,"_") + '.txt';
+  //   fs.writeFile(file_name, data, (err) => {
+    
+  //       // In case of a error throw err.
+  //       if (err) throw err;
+  //   })
+
+  //   //stop experiment on TNOR
+  //   fetch('http://10.5.1.4:9055/v1/parameters', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify({
+  //       "action": "stop",
+  //       "use_case": "UC1",
+  //       "test_case": "TC2",
+  //       "test_case_id": sessionId
+  //    })
+  //   }).then(console.log("stop of TNOR kpis"))
+    
+  //   closeConnection();
+  // });
 }
 
 function onErrorEvent(event) {
