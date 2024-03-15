@@ -76,9 +76,6 @@ function socketHandler(data){
         const video = document.getElementById('video');
         video.style.display="block";
         video.play();
-        video.pause();
-        video.currentTime = 0;
-        video.play();
         video.muted=false;
       }
       
@@ -121,23 +118,23 @@ function socketHandler(data){
           // console.log("latency 5: ", appLatency.trigger[i]);
         }
         // quiz is failed/alternative ending
-        if(message.kpi == 'failed'){
-          failed = true;
-          const video = document.getElementById('video');
-          const videoAlternativeEnding = document.getElementById('videoAlternativeEnding');
+        // if(message.kpi == 'failed'){
+        //   failed = true;
+        //   const video = document.getElementById('video');
+        //   const videoAlternativeEnding = document.getElementById('videoAlternativeEnding');
 
-          video.pause();
-          video.muted=true;
-          document.getElementById("video").style.display = "none";
+        //   video.pause();
+        //   video.muted=true;
+        //   document.getElementById("video").style.display = "none";
 
-          videoAlternativeEnding.style.display="block";
-          videoAlternativeEnding.play();
-          videoAlternativeEnding.muted=false;
+        //   videoAlternativeEnding.style.display="block";
+        //   videoAlternativeEnding.play();
+        //   videoAlternativeEnding.muted=false;
 
-          appLatency.latency6.screen2 = message.time;
+        //   appLatency.latency6.screen2 = message.time;
 
-          closeConnection();
-        }
+        //   closeConnection();
+        // }
       }
 
       // try {
@@ -417,6 +414,27 @@ async function initPlayer() {
       }
 
   }, 100); // 1000 milliseconds = 1 second
+
+  //measuring the latency1
+  video.onplaying = function() {
+    console.log("playing");
+    let date = new Date();
+    appLatency.latency1.screen1 = date.getTime();
+  };
+
+  videoAlternativeEnding.onplaying = function() {
+    let date = new Date();
+    appLatency.latency6.screen1 = date.getTime();
+
+    appLatency.latency6.dt = Math.abs(appLatency.latency6.screen1 - appLatency.latency6.screen2);
+    // console.log("latency 6: ", appLatency.latency6);
+  };
+
+  video.addEventListener('waiting', function() {
+    console.log("Video is buffering");
+    // Do something when the video is buffering
+    numberOfBufferings++;
+  });
 
   video.addEventListener('ended', function(e) {
     video.style.display="none";
@@ -792,27 +810,7 @@ async function initPlayer() {
     onError(e);
   }
 
-  
 
-  //measuring the latency1
-  video.onplaying = function() {
-    let date = new Date();
-    appLatency.latency1.screen1 = date.getTime();
-  };
-
-  videoAlternativeEnding.onplaying = function() {
-    let date = new Date();
-    appLatency.latency6.screen1 = date.getTime();
-
-    appLatency.latency6.dt = Math.abs(appLatency.latency6.screen1 - appLatency.latency6.screen2);
-    // console.log("latency 6: ", appLatency.latency6);
-  };
-
-  video.addEventListener('waiting', function() {
-    console.log("Video is buffering");
-    // Do something when the video is buffering
-    numberOfBufferings++;
-  });
 
   // video.addEventListener('pause', function() {
   //   console.log("Video is paused");
@@ -825,158 +823,6 @@ async function initPlayer() {
   //   numberOfFramesError++;
   //   // You can update your error metrics here
   //   frameErrorRate = numberOfFramesError;
-  // });
-
-
-  // videoAlternativeEnding.addEventListener('ended', function(e) {
-  //   averageCPUusage *= 100;
-  //   averageRAMusage /= totalMemory;
-  //   averageRAMusage *= 100;
-    
-  //   //frame error rate
-  //   frameErrorRate = player.getStats().droppedFrames/video.getVideoPlaybackQuality().totalVideoFrames * 100;
-  //   // console.log("frames dropped: "+player.getStats().droppedFrames);
-  //   // console.log("total frames (rendered?): " + video.getVideoPlaybackQuality().totalVideoFrames);
-
-  //   // Calculate the standard deviation of frame deltas
-  //   var jitter = calculateStandardDeviation(frameDeltas)/video.duration * 100;
-
-  //   //stall probability
-  //   stall_probability = numberOfBufferings / video.getVideoPlaybackQuality().totalVideoFrames * 100;
-    
-  //   json.data.kpis.push({
-  //     "name": "framerate",
-  //     "value": averageFrameRate.toString(),
-  //     "unit": "frameps"
-  //   });
-
-  //   json.data.kpis.push({
-  //     "name": "cpu-usage",
-  //     "value": averageCPUusage.toString(),
-  //     "unit": "percent"
-  //   });
-
-  //   json.data.kpis.push({
-  //     "name": "ram-usage",
-  //     "value": averageRAMusage.toString(),
-  //     "unit": "percent"
-  //   });
-
-  //   json.data.kpis.push({
-  //     "name": "video-bitrate",
-  //     "value": videoBitrate.toString(),
-  //     "unit": "kbps"
-  //   });
-
-  //   json.data.kpis.push({
-  //     "name": "video-resolution",
-  //     "value": "8K",
-  //     "unit": " "
-  //   });
-
-  //   json.data.kpis.push({
-  //     "name": "frame-error-rate",
-  //     "value": frameErrorRate,
-  //     "unit": " "
-  //   });
-
-  //   json.data.kpis.push({
-  //     "name": "video-jitter",
-  //     "value": jitter,
-  //     "unit": "percent"
-  //   });
-
-  //   json.data.kpis.push({
-  //     "name": "stall-probability",
-  //     "value": stall_probability,
-  //     "unit": "percent"
-  //   });
-
-  //   let appLatencies = [appLatency.latency1.dt, appLatency.trigger[0].dt, appLatency.trigger[1].dt, appLatency.trigger[2].dt, appLatency.trigger[3].dt, appLatency.latency6.dt];
-  //   json.data.kpis.push({
-  //     "name": "application latency 1",
-  //     "value": appLatencies[0].toString(),
-  //     "unit": "ms"
-  //   });
-  //   json.data.kpis.push({
-  //     "name": "application latency 2",
-  //     "value": appLatencies[1].toString(),
-  //     "unit": "ms"
-  //   });
-  //   json.data.kpis.push({
-  //     "name": "application latency 3",
-  //     "value": appLatencies[2].toString(),
-  //     "unit": "ms"
-  //   });
-  //   json.data.kpis.push({
-  //     "name": "application latency 4",
-  //     "value": appLatencies[3].toString(),
-  //     "unit": "ms"
-  //   });
-  //   json.data.kpis.push({
-  //     "name": "application latency 5",
-  //     "value": appLatencies[4].toString(),
-  //     "unit": "ms"
-  //   });
-  //   json.data.kpis.push({
-  //     "name": "application latency 6",
-  //     "value": appLatencies[5].toString(),
-  //     "unit": "ms"
-  //   });
-  //   console.log(json);
-  //   fetch('http://5gmediahub.vvservice.cttc.es/5gmediahub/data-collector/kpis', {
-  //       method: 'POST',
-  //       headers: {
-  //           'Authorization': 'Bearer ' + token.access_token,
-  //           'Content-Type': 'application/json'
-  //       },
-  //       body: JSON.stringify(json)
-  //     }).then(response => response.json())
-  //       .then(response => console.log(JSON.stringify(response)))
-  //   console.log("average framerate (frames/s): ", averageFrameRate);
-  //   console.log("average cpu-usage (%): ", averageCPUusage);
-  //   console.log('ram-usage (%): ', averageRAMusage);
-  //   console.log('estimated video bitrate (Mbps):', videoBitrate);
-  //   console.log('video resolution: 8K');
-  //   console.log('frame error rate: ', frameErrorRate);
-  //   console.log('stall probability (%): ', stall_probability);
-  //   console.log('video jitter (%): ' + jitter);
-  //   console.log("application latencies (ms): ", appLatencies);
-
-  //   //write a log file
-  //   let data = "session id: " + sessionId + "\n";
-  //   data += "average framerate (frames/s): " + averageFrameRate + "\n";
-  //   data += "average cpu-usage (%): " + averageCPUusage + "\n";
-  //   data += "ram-usage (%): " + averageRAMusage + "\n";
-  //   data += "estimated video bitrate (Mbps):" + videoBitrate + "\n";
-  //   data += "video resolution: 8K\n";
-  //   data += "frame error rate (%): " + frameErrorRate + "\n";
-  //   data += "stall probability (%): " + stall_probability + "\n";
-  //   data += "video jitter (%): " + jitter + "\n";
-  //   data += "application latencies (ms): " + appLatencies[0].toString() + ", " + appLatencies[1].toString() + ", " + appLatencies[2].toString() + ", " + appLatencies[3].toString() + ", " + appLatencies[4].toString();
-  //   let d = new Date();
-  //   let file_name = './Log/' + d.toISOString().replace(/:/g,"_") + '.txt';
-  //   fs.writeFile(file_name, data, (err) => {
-    
-  //       // In case of a error throw err.
-  //       if (err) throw err;
-  //   })
-
-  //   //stop experiment on TNOR
-  //   fetch('http://10.5.1.4:9055/v1/parameters', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     },
-  //     body: JSON.stringify({
-  //       "action": "stop",
-  //       "use_case": "UC1",
-  //       "test_case": "TC2",
-  //       "test_case_id": sessionId
-  //    })
-  //   }).then(console.log("stop of TNOR kpis"))
-    
-  //   closeConnection();
   // });
 }
 
