@@ -1,0 +1,10 @@
+session id: 74c50d27-fed3-4539-b7d3-615d5ac3a5d3
+average framerate (frames/s): 25.002521170283632
+average cpu-usage (%): 1.0821562464159147
+ram-usage (%): 0.029359019824442795
+estimated video bitrate (Mbps):15.09
+video resolution: 8K
+frame error rate (%): 0.0390015600624025
+stall probability (%): 0
+video jitter (%): 0.006983916690061016
+application latencies (ms): NaN, 486, 505, 502, 504
