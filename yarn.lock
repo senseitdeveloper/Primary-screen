@@ -686,6 +686,11 @@ buffer@^5.5.0:
     base64-js "^1.3.1"
     ieee754 "^1.1.13"
 
+buildcheck@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.npmjs.org/buildcheck/-/buildcheck-0.0.5.tgz"
+  integrity sha512-jYWpRy8eedl/JZqkOeq0X0bNcaK04hXKhIi4gYsDKZUJWRjJJWViYfsMXO0BJQ40zSLcdLoa+iqe48Kz2PtQag==
+
 cacache@^16.1.0:
   version "16.1.3"
   resolved "https://registry.npmjs.org/cacache/-/cacache-16.1.3.tgz"
@@ -858,6 +863,14 @@ core-util-is@~1.0.0:
   version "1.0.3"
   resolved "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.3.tgz"
   integrity sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==
+
+cpu-features@~0.0.4:
+  version "0.0.6"
+  resolved "https://registry.npmjs.org/cpu-features/-/cpu-features-0.0.6.tgz"
+  integrity sha512-Rj33pk//oVNh25YjsBaKtOkXNW7IARYxejWJosJkXqVPpbK+FrdpThPk6f4m3d+CEh2qMlkGx/SFt2Y1XSWN6g==
+  dependencies:
+    buildcheck "0.0.5"
+    nan "^2.17.0"
 
 cross-spawn-windows-exe@^1.1.0, cross-spawn-windows-exe@^1.2.0:
   version "1.2.0"
@@ -2161,6 +2174,11 @@ mux.js@6.2.0:
   dependencies:
     "@babel/runtime" "^7.11.2"
     global "^4.4.0"
+
+nan@^2.16.0, nan@^2.17.0:
+  version "2.17.0"
+  resolved "https://registry.npmjs.org/nan/-/nan-2.17.0.tgz"
+  integrity sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==
 
 negotiator@^0.6.3:
   version "0.6.3"

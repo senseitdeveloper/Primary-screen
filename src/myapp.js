@@ -9,28 +9,38 @@ let failed = false;
 let json = {};
 let appLatency = {
   latency1: {
-    screen1: 0,
-    screen2: 0,
+    screen1_stamp1: 0,
+    screen1_stamp2: 0,
+    screen2_stamp1: 0,
+    screen2_stamp2: 0,
     dt: 0
   },
   trigger: [{
-      screen1: 0,
-      screen2: 0,
+      screen1_stamp1: 0,
+      screen1_stamp2: 0,
+      screen2_stamp1: 0,
+      screen2_stamp2: 0,
       dt: 0
     },
     {
-      screen1: 0,
-      screen2: 0,
+      screen1_stamp1: 0,
+      screen1_stamp2: 0,
+      screen2_stamp1: 0,
+      screen2_stamp2: 0,
       dt: 0
     },
     {
-      screen1: 0,
-      screen2: 0,
+      screen1_stamp1: 0,
+      screen1_stamp2: 0,
+      screen2_stamp1: 0,
+      screen2_stamp2: 0,
       dt: 0
     },
     {
-      screen1: 0,
-      screen2: 0,
+      screen1_stamp1: 0,
+      screen1_stamp2: 0,
+      screen2_stamp1: 0,
+      screen2_stamp2: 0,
       dt: 0
     }
   ],
@@ -82,41 +92,117 @@ function socketHandler(data){
       if(data.sender == 2){
         let message = JSON.parse(data.message)
         if(message.kpi == 'latency1'){
-          appLatency.latency1.screen2 = message.time;
+          if(message.which == 'stamp1'){
+            appLatency.latency1.screen2_stamp1 = message.time;
+          }
 
-          appLatency.latency1.dt = Math.abs(appLatency.latency1.screen1 - appLatency.latency1.screen2);
-          if(appLatency.latency1.dt > 1710498115968)
-            appLatency.latency1.dt = "NaN";
-          // console.log("latency 1: ", appLatency.latency1);
+          if(message.which == 'stamp2'){
+            appLatency.latency1.screen2_stamp2 = message.time;
+            let date = new Date();
+            appLatency.latency1.screen1_stamp2 = date.getTime();
+
+            appLatency.latency1.dt = (appLatency.latency1.screen2_stamp2 - appLatency.latency1.screen2_stamp1) - (appLatency.latency1.screen1_stamp2 - appLatency.latency1.screen1_stamp1)*0.5;
+            console.log("latency 1: ", appLatency.latency1);
+          }
         }
+        //--------------------------------------------------------
         if(message.kpi == 'latency2'){
           let i = 0;
-          appLatency.trigger[i].screen2 = message.time;
+          if(message.which == 'stamp1'){
+            appLatency.trigger[i].screen2_stamp1 = message.time;
+            let date = new Date();
+            appLatency.trigger[i].screen1_stamp2 = date.getTime();
 
-          appLatency.trigger[i].dt = Math.abs(appLatency.trigger[i].screen2 - appLatency.trigger[i].screen1);
-          // console.log("latency 2: ", appLatency.trigger[i]);
+            //send screen 1 stamp 2
+            socket.send(JSON.stringify(
+              {
+                event: 'message',
+                sessionId: sessionId,
+                message: 'latency2'
+              }
+            ));
+          }
+
+          if(message.which == 'stamp2'){
+            appLatency.trigger[i].screen2_stamp2 = message.time;
+            
+            appLatency.trigger[i].dt = (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) - (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1)*0.5;
+            console.log("latency 2: ", appLatency.trigger[i]);
+          }
         }
         if(message.kpi == 'latency3'){
           let i = 1;
-          appLatency.trigger[i].screen2 = message.time;
+          if(message.which == 'stamp1'){
+            appLatency.trigger[i].screen2_stamp1 = message.time;
+            let date = new Date();
+            appLatency.trigger[i].screen1_stamp2 = date.getTime();
 
-          appLatency.trigger[i].dt = Math.abs(appLatency.trigger[i].screen2 - appLatency.trigger[i].screen1);
-          // console.log("latency 3: ", appLatency.trigger[i]);
+            //send screen 1 stamp 2
+            socket.send(JSON.stringify(
+              {
+                event: 'message',
+                sessionId: sessionId,
+                message: 'latency3'
+              }
+            ));
+          }
+
+          if(message.which == 'stamp2'){
+            appLatency.trigger[i].screen2_stamp2 = message.time;
+            
+            appLatency.trigger[i].dt = (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) - (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1)*0.5;
+            console.log("latency 3: ", appLatency.trigger[i]);
+          }
         }
         if(message.kpi == 'latency4'){
           let i = 2;
-          appLatency.trigger[2].screen2 = message.time;
+          if(message.which == 'stamp1'){
+            appLatency.trigger[i].screen2_stamp1 = message.time;
+            let date = new Date();
+            appLatency.trigger[i].screen1_stamp2 = date.getTime();
 
-          appLatency.trigger[i].dt = Math.abs(appLatency.trigger[i].screen2 - appLatency.trigger[i].screen1);
-          // console.log("latency 4: ", appLatency.trigger[i]);
+            //send screen 1 stamp 2
+            socket.send(JSON.stringify(
+              {
+                event: 'message',
+                sessionId: sessionId,
+                message: 'latency4'
+              }
+            ));
+          }
+
+          if(message.which == 'stamp2'){
+            appLatency.trigger[i].screen2_stamp2 = message.time;
+            
+            appLatency.trigger[i].dt = (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) - (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1)*0.5;
+            console.log("latency 4: ", appLatency.trigger[i]);
+          }
         }
         if(message.kpi == 'latency5'){
           let i = 3;
-          appLatency.trigger[3].screen2 = message.time;
+          if(message.which == 'stamp1'){
+            appLatency.trigger[i].screen2_stamp1 = message.time;
+            let date = new Date();
+            appLatency.trigger[i].screen1_stamp2 = date.getTime();
 
-          appLatency.trigger[i].dt = Math.abs(appLatency.trigger[i].screen2 - appLatency.trigger[i].screen1);
-          // console.log("latency 5: ", appLatency.trigger[i]);
+            //send screen 1 stamp 2
+            socket.send(JSON.stringify(
+              {
+                event: 'message',
+                sessionId: sessionId,
+                message: 'latency5'
+              }
+            ));
+          }
+
+          if(message.which == 'stamp2'){
+            appLatency.trigger[i].screen2_stamp2 = message.time;
+            
+            appLatency.trigger[i].dt = (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) - (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1)*0.5;
+            console.log("latency 5: ", appLatency.trigger[i]);
+          }
         }
+        
         // quiz is failed/alternative ending
         // if(message.kpi == 'failed'){
         //   failed = true;
@@ -407,7 +493,7 @@ async function initPlayer() {
           ));
           // latencies 2,3,4,5
           let date = new Date();
-          appLatency.trigger[i].screen1 = date.getTime();
+          appLatency.trigger[i].screen1_stamp1 = date.getTime();
   
           triggerTimes[i]=-1;
         }
@@ -419,7 +505,15 @@ async function initPlayer() {
   video.onplaying = function() {
     console.log("playing");
     let date = new Date();
-    appLatency.latency1.screen1 = date.getTime();
+    appLatency.latency1.screen1_stamp1 = date.getTime();
+    //send screen 1 stamp 1
+    socket.send(JSON.stringify(
+      {
+        event: 'message',
+        sessionId: sessionId,
+        message: 'latency1'
+      }
+    ));
   };
 
   videoAlternativeEnding.onplaying = function() {
