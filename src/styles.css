@@ -19,6 +19,24 @@
     margin-left: 10%;
     margin-right: 10%;
 }
+#memory {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-direction: column;
+    min-height: 100vh;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+#memory_win {
+    font-family: "Lucida Console";
+    font-size: 3.5vw;
+}
+#memory_fail {
+    font-family: "Lucida Console";
+    font-size: 4vw;
+}
 #title {
     font-family: "Lucida Console";
     font-size: 4vw;
