@@ -103,9 +103,9 @@ function socketHandler(data){
             let date = new Date();
             appLatency.latency1.screen1_stamp2 = date.getTime();
           
-            appLatency.latency1.dt = Math.abs((appLatency.latency1.screen2_stamp2 - appLatency.latency1.screen2_stamp1) - (appLatency.latency1.screen1_stamp2 - appLatency.latency1.screen1_stamp1)*0.5);
+            appLatency.latency1.dt = Math.abs((appLatency.latency1.screen2_stamp2 - appLatency.latency1.screen2_stamp1) + (appLatency.latency1.screen1_stamp2 - appLatency.latency1.screen1_stamp1))*0.25;
             console.log("latency 1: ", appLatency.latency1.dt);
-            console.log("latency 1: ", (appLatency.latency1.screen2_stamp2 - appLatency.latency1.screen2_stamp1), (appLatency.latency1.screen1_stamp2 - appLatency.latency1.screen1_stamp1));
+            // console.log("latency 1: ", (appLatency.latency1.screen2_stamp2 - appLatency.latency1.screen2_stamp1), (appLatency.latency1.screen1_stamp2 - appLatency.latency1.screen1_stamp1));
           }
         }
         //--------------------------------------------------------
@@ -129,9 +129,9 @@ function socketHandler(data){
           if(message.which == 'stamp2'){
             appLatency.trigger[i].screen2_stamp2 = message.time;
             
-            appLatency.trigger[i].dt = Math.abs((appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) - (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1)*0.5);
+            appLatency.trigger[i].dt = Math.abs((appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) + (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1))*0.25;
             console.log("latency 2: ", appLatency.trigger[i].dt);
-            console.log("latency 2: ", (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1), (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1));
+            // console.log("latency 2: ", (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1), (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1));
           }
         }
 
@@ -155,9 +155,9 @@ function socketHandler(data){
           if(message.which == 'stamp2'){
             appLatency.trigger[i].screen2_stamp2 = message.time;
             
-            appLatency.trigger[i].dt =Math.abs((appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) - (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1)*0.5);
+            appLatency.trigger[i].dt =Math.abs((appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) + (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1))*0.25;
             console.log("latency 3: ", appLatency.trigger[i].dt);
-            console.log("latency 3: ", (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1), (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1));
+            // console.log("latency 3: ", (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1), (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1));
           }
         }
         if(message.kpi == 'latency4'){
@@ -180,9 +180,9 @@ function socketHandler(data){
           if(message.which == 'stamp2'){
             appLatency.trigger[i].screen2_stamp2 = message.time;
             
-            appLatency.trigger[i].dt = Math.abs((appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) - (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1)*0.5);
+            appLatency.trigger[i].dt = Math.abs((appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) + (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1))*0.25;
             console.log("latency 4: ", appLatency.trigger[i].dt);
-            console.log("latency 4: ", (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1), (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1));
+            // console.log("latency 4: ", (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1), (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1));
           }
         }
         if(message.kpi == 'latency5'){
@@ -205,9 +205,9 @@ function socketHandler(data){
           if(message.which == 'stamp2'){
             appLatency.trigger[i].screen2_stamp2 = message.time;
             
-            appLatency.trigger[i].dt = Math.abs((appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) - (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1)*0.5);
+            appLatency.trigger[i].dt = Math.abs((appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1) + (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1))*0.25;
             console.log("latency 5: ", appLatency.trigger[i].dt);
-            console.log("latency 5: ", (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1), (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1));
+            // console.log("latency 5: ", (appLatency.trigger[i].screen2_stamp2 - appLatency.trigger[i].screen2_stamp1), (appLatency.trigger[i].screen1_stamp2 - appLatency.trigger[i].screen1_stamp1));
           }
         }
         //----------------------------------------------------------------
@@ -217,9 +217,9 @@ function socketHandler(data){
             let date = new Date();
             appLatency.latency6.screen1_stamp2 = date.getTime();
           
-            appLatency.latency6.dt = Math.abs((appLatency.latency6.screen2_stamp2 - appLatency.latency6.screen2_stamp1) - (appLatency.latency6.screen1_stamp2 - appLatency.latency6.screen1_stamp1)*0.5);
+            appLatency.latency6.dt = Math.abs((appLatency.latency6.screen2_stamp2 - appLatency.latency6.screen2_stamp1) + (appLatency.latency6.screen1_stamp2 - appLatency.latency6.screen1_stamp1))*0.25;
             console.log("latency 6: ", appLatency.latency6.dt);
-            console.log("latency 6: ", (appLatency.latency6.screen2_stamp2 - appLatency.latency6.screen2_stamp1), (appLatency.latency6.screen1_stamp2 - appLatency.latency6.screen1_stamp1));
+            // console.log("latency 6: ", (appLatency.latency6.screen2_stamp2 - appLatency.latency6.screen2_stamp1), (appLatency.latency6.screen1_stamp2 - appLatency.latency6.screen1_stamp1));
 
             onVideoEnd(true);
           }
@@ -526,15 +526,15 @@ async function initPlayer() {
       }
       
       //comment out if you want only fail
-      // if(Math.floor(video.currentTime*10)/10 < 140+0.2 && Math.floor(video.currentTime*10)/10 > 140-0.2){
-      //   socket.send(JSON.stringify(
-      //     {
-      //       event: 'message',
-      //       sessionId: sessionId,
-      //       message: 'onlyfail'
-      //     }
-      //   ));
-      // }
+      if(Math.floor(video.currentTime*10)/10 < 140+0.2 && Math.floor(video.currentTime*10)/10 > 140-0.2){
+        socket.send(JSON.stringify(
+          {
+            event: 'message',
+            sessionId: sessionId,
+            message: 'onlyfail'
+          }
+        ));
+      }
 
   }, 100); // 1000 milliseconds = 1 second
 
